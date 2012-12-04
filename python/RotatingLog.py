@@ -17,8 +17,7 @@ class RotatingLog:
 		@classmethod
 		def fromString(cls, str):
 			return getattr(cls, str.upper(), None)
-			
-		
+
 	DEFAULT_SETTINGS = {'INTERVAL': 'MINUTE', 'HISTORY': 5}
 	LOG_PREFIX = 'log_'
 	LOG_SUFFIX = '.txt'
@@ -30,15 +29,18 @@ class RotatingLog:
 		self.settingsFile = self.logDirectory + os.sep + 'settings.json.js'
 		self.__loadSettings()
 		self.__cleanUp()
-		
-		
+
+
 	def log(self, entry):
+		self.write(entry + '\n')
+
+	def write(self, entry):
 		filePath = self.__getCurrentFilePath()
 		f = open(filePath, 'a')
-		f.write(entry + '\n')
+		f.write(entry)
 		f.close()
 		self.__cleanUp()
-	
+
 	def __getCurrentFilePath(self):
 		now = datetime.datetime.now().timetuple()
 		filePath = self.logDirectory + os.sep + RotatingLog.LOG_PREFIX + str(now[0]).rjust(4,'0')
@@ -46,7 +48,7 @@ class RotatingLog:
 			filePath += str(now[i]).rjust(2,'0')
 		filePath += '.txt'
 		return filePath
-	
+
 	def __loadSettings(self):
 		if os.path.exists(self.settingsFile):
 			f = open(self.settingsFile, 'r')
@@ -55,7 +57,7 @@ class RotatingLog:
 			self.settings = json.loads(jsonStr)
 		else:
 			self.settings = RotatingLog.DEFAULT_SETTINGS
-		
+
 		self.interval = RotatingLog.INTERVAL.fromString(self.settings['INTERVAL'])
 		self.timeDelta = datetime.timedelta(days=30)
 		if self.interval == RotatingLog.INTERVAL.DAY:
@@ -68,12 +70,12 @@ class RotatingLog:
 			self.timeDelta = datetime.timedelta(minutes=self.settings['HISTORY'])
 			self.cleanUpInterval = datetime.timedelta(minutes=1)
 		self.lastCleanUp = datetime.datetime.now() - self.cleanUpInterval
-	
+
 	def __saveSettings(self):
 		f = open(self.settingsFile, 'w')
 		f.write(json.dumps(self.settings, sort_keys=True, indent=4, separators=(',', ': ')))
 		f.close()
-	
+
 	def __cleanUp(self):
 		needsCleaning = datetime.datetime.now() - self.lastCleanUp >= self.cleanUpInterval
 		if not needsCleaning:
@@ -84,14 +86,14 @@ class RotatingLog:
 				if not self.__compareLogs(currentLogFileName, f):
 					os.remove(self.logDirectory + os.sep + f)
 		self.lastCleanUp = datetime.datetime.now()
-	
+
 	def __compareLogs(self, file1, file2):
 		file1 = file1[len(RotatingLog.LOG_PREFIX):-len(RotatingLog.LOG_SUFFIX)]
 		file2 = file2[len(RotatingLog.LOG_PREFIX):-len(RotatingLog.LOG_SUFFIX)]
 		dt1 = RotatingLog.stamp2Datetime(file1)
 		dt2 = RotatingLog.stamp2Datetime(file2)
 		return dt2 - dt1 >= - self.timeDelta
-	
+
 	@staticmethod
 	def stamp2Datetime(stamp):
 		arr = [int(stamp[0:4])]
