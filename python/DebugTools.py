@@ -12,14 +12,18 @@ class DebugTools:
 		DEBUG2 = 6
 		DEBUG3 = 7
 	
-	debugLevel = DEBUG_LEVEL.QUIET
+	def __init__(self, debugLevel = DEBUG_LEVEL.QUIET, stream = sys.stdout, errStream = sys.stderr):
+		self.debugLevel = debugLevel
+		self.stream = stream
+		self.errStream = errStream
 	
-	@staticmethod
-	def println(arg, debugLevel = DEBUG_LEVEL.DEBUG):
-		if debugLevel <= DebugTools.debugLevel:
-			print arg
+	def println(self, arg, debugLevel = DEBUG_LEVEL.DEBUG):
+		self.write(arg, debugLevel)
 
-	@staticmethod
-	def printerr(arg, debugLevel = DEBUG_LEVEL.DEBUG):
-		if debugLevel <= DebugTools.debugLevel:
-			print >> sys.stderr, arg
+	def write(self, arg, debugLevel = DEBUG_LEVEL.DEBUG):
+		if debugLevel <= self.debugLevel:
+			print >> self.stream, arg,
+
+	def printerr(self, arg, debugLevel = DEBUG_LEVEL.DEBUG):
+		if debugLevel <= self.debugLevel:
+			print >> self.errStream, arg

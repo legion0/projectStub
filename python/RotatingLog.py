@@ -30,7 +30,6 @@ class RotatingLog:
 		self.__loadSettings()
 		self.__cleanUp()
 
-
 	def log(self, entry):
 		self.write(entry + '\n')
 
@@ -104,10 +103,3 @@ class RotatingLog:
 		for i in xrange(len(arr),6):
 			arr.append(0)
 		return datetime.datetime(*arr)
-
-def main(args):
-	logger = RotatingLog()
-	logger.log('hello')
-
-if __name__=="__main__":
-   main(sys.argv)
